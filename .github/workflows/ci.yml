@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verificar:
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+    env:
+      TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
+      ADMIN_DATABASE_URL: postgres://postgres:postgres@localhost:5432/balcao
+      DATABASE_URL: postgres://balcao_app:balcao_app_dev@localhost:5432/balcao
+      WORKER_DATABASE_URL: postgres://balcao_worker:balcao_worker_dev@localhost:5432/balcao
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Tipos
+        run: npm run typecheck
+      - name: Build da API e do console
+        run: npm run build
+      - name: Banco, migrações e seed
+        run: |
+          psql "$TEST_DATABASE_URL" -c "create database balcao"
+          npm run db:migrar
+          npm run db -- papeis
+          npm run db:semear
+          npm run db:status
+      - name: Migrações são idempotentes
+        run: npm run db:migrar | grep "Nada a migrar"
+      - name: Testes unitários
+        run: npm test
+      - name: Testes de integração (PostgreSQL 16 real)
+        run: npm run test:integration
+      - name: Backup e restauração verificada
+        run: |
+          npm run backup
+          npm run restore:verificar
+      - name: docker-compose.yml válido
+        run: docker compose config --quiet
