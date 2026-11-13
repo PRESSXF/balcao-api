@@ -352,7 +352,7 @@ describe('operação', () => {
     expect((await app.inject({ url: '/health' })).json()).toEqual({ status: 'ok' })
     const ready = await app.inject({ url: '/ready' })
     expect(ready.statusCode).toBe(200)
-    expect(ready.json()).toMatchObject({ status: 'pronto', migracao: '0007' })
+    expect(ready.json()).toMatchObject({ status: 'pronto', migracao: '0008' })
     const m = await app.inject({ url: '/metrics' })
     expect(m.body).toContain('balcao_http_request_duration_seconds_bucket')
     expect(m.body).toMatch(/balcao_fila_jobs\{tipo="entrega_webhook",status="pendente"\} \d+/)

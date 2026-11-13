@@ -39,8 +39,11 @@ export default async function setup({ provide }: GlobalSetupContext) {
   }
   const urls = {
     admin: comBanco(),
-    app: comBanco('balcao_app', 'senha_teste_app'),
-    worker: comBanco('balcao_worker', 'senha_teste_worker'),
+    // Papéis são do cluster inteiro, não do banco. As senhas padrão são as de
+    // desenvolvimento para que rodar os testes no mesmo cluster do ambiente
+    // local não derrube a API que já está conectada.
+    app: comBanco('balcao_app', process.env.TEST_APP_DB_PASSWORD ?? 'balcao_app_dev'),
+    worker: comBanco('balcao_worker', process.env.TEST_WORKER_DB_PASSWORD ?? 'balcao_worker_dev'),
   }
 
   const admin = new pg.Client({ connectionString: urls.admin })

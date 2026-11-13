@@ -26,7 +26,7 @@ type LinhaAgendamento = Type.Static<typeof Agendamento>
 
 const SELECT_AGENDAMENTO = `
   select a.id, a.profissional_id, p.nome as profissional, a.cliente_id, c.nome as cliente,
-         a.servico_id, s.nome as servico, lower(a.periodo) as inicio, upper(a.periodo) as fim,
+         a.servico_id, s.nome as servico, a.inicio, upper(a.periodo) as fim,
          a.status, a.preco_centavos, a.observacao
     from agendamentos a
     join profissionais p on p.tenant_id = a.tenant_id and p.id = a.profissional_id
@@ -99,10 +99,10 @@ export const rotasAgenda: FastifyPluginAsyncTypebox = async (app) => {
         )
         const agendamentos = await db.query<LinhaAgendamento>(
           `${SELECT_AGENDAMENTO}
-            where lower(a.periodo) >= ($1::date)::timestamp at time zone $2
-              and lower(a.periodo) <  ($1::date + 1)::timestamp at time zone $2
+            where a.inicio >= ($1::date)::timestamp at time zone $2
+              and a.inicio <  ($1::date + 1)::timestamp at time zone $2
               and ($3::uuid is null or a.profissional_id = $3)
-            order by lower(a.periodo), a.id`,
+            order by a.inicio, a.id`,
           [t.dia, t.fuso, req.query.profissional_id ?? null],
         )
         return { dia: t.dia, fuso: t.fuso, profissionais, agendamentos }
@@ -135,13 +135,13 @@ export const rotasAgenda: FastifyPluginAsyncTypebox = async (app) => {
       const linhas = await req.db((db) =>
         db.query<LinhaAgendamento>(
           `${SELECT_AGENDAMENTO}
-            where ($1::timestamptz is null or (lower(a.periodo), a.id) > ($1::timestamptz, $2::uuid))
-              and ($3::timestamptz is null or lower(a.periodo) >= $3)
-              and ($4::timestamptz is null or lower(a.periodo) < $4)
+            where ($1::timestamptz is null or (a.inicio, a.id) > ($1::timestamptz, $2::uuid))
+              and ($3::timestamptz is null or a.inicio >= $3)
+              and ($4::timestamptz is null or a.inicio < $4)
               and ($5::uuid is null or a.profissional_id = $5)
               and ($6::uuid is null or a.cliente_id = $6)
               and ($7::text is null or a.status = $7)
-            order by lower(a.periodo), a.id
+            order by a.inicio, a.id
             limit $8`,
           [cursor?.[0] ?? null, cursor?.[1] ?? null, q.de ?? null, q.ate ?? null, q.profissional_id ?? null, q.cliente_id ?? null, q.status ?? null, limite + 1],
         ),

@@ -1,0 +1,86 @@
+# Balcão local ou em qualquer VM com Docker:
+#   docker compose up
+# Console em http://localhost:4190, documentação em http://localhost:4190/docs.
+# Valores padrão servem para demonstração; em produção, defina tudo no .env
+# (veja .env.example e docs/DEPLOY.md).
+
+name: balcao
+
+x-app: &app
+  build: .
+  image: balcao-api:local
+  environment: &app-env
+    NODE_ENV: production
+    LOG_LEVEL: ${LOG_LEVEL:-info}
+    DATABASE_URL: postgres://balcao_app:${APP_DB_PASSWORD:-balcao_app_dev}@db:5432/${POSTGRES_DB:-balcao}
+    WORKER_DATABASE_URL: postgres://balcao_worker:${WORKER_DB_PASSWORD:-balcao_worker_dev}@db:5432/${POSTGRES_DB:-balcao}
+    ADMIN_DATABASE_URL: postgres://${POSTGRES_USER:-balcao}:${POSTGRES_PASSWORD:-balcao_dev}@db:5432/${POSTGRES_DB:-balcao}
+    JWT_SECRET: ${JWT_SECRET:-somente-para-demo-local-troque-em-producao-0123456789}
+    DEMO_MODE: ${DEMO_MODE:-true}
+    DEMO_WEBHOOK_URL: http://api:4190/demo/webhooks
+    WHATSAPP_SIMULATED_LATENCY_MS: ${WHATSAPP_SIMULATED_LATENCY_MS:-1500}
+  restart: unless-stopped
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-balcao}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-balcao_dev}
+      POSTGRES_DB: ${POSTGRES_DB:-balcao}
+    ports:
+      # Só na interface local da máquina: o banco nunca fica exposto na rede.
+      - "127.0.0.1:${DB_PORT:-55432}:5432"
+    volumes:
+      - balcao-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    stop_grace_period: 30s
+    restart: unless-stopped
+
+  # Roda uma vez: migrações, senhas dos papéis e dados de demonstração (se vazio).
+  migrate:
+    <<: *app
+    command: ["node", "dist/cli/db.js", "preparar"]
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    <<: *app
+    command: ["node", "dist/server.js"]
+    ports:
+      - "${API_PORT:-4190}:4190"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:4190/ready || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    stop_grace_period: 15s
+
+  worker:
+    <<: *app
+    command: ["node", "dist/worker-main.js"]
+    environment:
+      <<: *app-env
+      WORKER_CONCURRENCY: ${WORKER_CONCURRENCY:-4}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:4191/health || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    # Tempo para terminar os jobs em andamento antes do SIGKILL.
+    stop_grace_period: 30s
+
+volumes:
+  balcao-pgdata:
