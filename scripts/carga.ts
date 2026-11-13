@@ -3,7 +3,7 @@
  *
  * Pré-requisitos: banco com volume (`npm run db:carga`), API de produção
  * rodando (`npm run build && npm start`), de preferência com LOG_LEVEL=warn.
- * Uso: npm run carga                       (padrão: http://localhost:4190)
+ * Uso: npm run carga                       (padrão: http://localhost:4280)
  *      BASE=http://host:porta DURACAO=20 CONEXOES=32 npm run carga
  *
  * Os percentis são calculados a partir do tempo de cada resposta (não do
@@ -15,7 +15,7 @@ import { writeFile } from 'node:fs/promises'
 import { cpus, totalmem } from 'node:os'
 import autocannon from 'autocannon'
 
-const BASE = process.env.BASE ?? 'http://localhost:4190'
+const BASE = process.env.BASE ?? 'http://localhost:4280'
 const DURACAO = Number(process.env.DURACAO ?? 15)
 const CONEXOES = Number(process.env.CONEXOES ?? 20)
 
@@ -28,7 +28,7 @@ interface Cenario {
   idempotente?: boolean
 }
 
-// node:http em vez de fetch: o fetch do Node recusa a porta 4190 (lista de portas ruins da especificação Fetch).
+// node:http, o mesmo cliente usado no envio de webhooks (src/jobs/http.ts).
 function postJson(url: string, corpo: unknown): Promise<{ status: number; json: unknown }> {
   return new Promise((resolve, reject) => {
     const dados = JSON.stringify(corpo)

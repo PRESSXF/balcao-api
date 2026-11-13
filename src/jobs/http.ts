@@ -3,7 +3,7 @@ import https from 'node:https'
 
 /**
  * POST com node:http/https em vez de fetch. O fetch do Node segue a lista de
- * "portas ruins" da especificação Fetch e recusa destinos como a porta 4190;
+ * "portas ruins" da especificação Fetch e recusa destinos como a porta 6000;
  * o receptor de webhook de um cliente pode estar em qualquer porta.
  */
 export type EnviarHttp = (

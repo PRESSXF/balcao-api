@@ -131,7 +131,7 @@ constraint agendamentos_sem_sobreposicao exclude using gist (
 
 ### 12. Webhooks assinados e enviados com `node:http`
 
-**Decisão.** Corpo JSON assinado como no Stripe: `X-Balcao-Assinatura: t=<unix>,v1=<HMAC-SHA256 de "t.corpo">`, com o segredo da empresa. O timestamp entra na assinatura para o receptor recusar reenvios antigos. Cada entrega leva `X-Balcao-Entrega` (igual em todas as tentativas) para o receptor deduplicar. O envio usa `node:http`/`https` e não `fetch`: o `fetch` do Node segue a lista de "portas ruins" da especificação Fetch e recusa, por exemplo, a porta 4190, e o receptor de um cliente pode estar em qualquer porta.
+**Decisão.** Corpo JSON assinado como no Stripe: `X-Balcao-Assinatura: t=<unix>,v1=<HMAC-SHA256 de "t.corpo">`, com o segredo da empresa. O timestamp entra na assinatura para o receptor recusar reenvios antigos. Cada entrega leva `X-Balcao-Entrega` (igual em todas as tentativas) para o receptor deduplicar. O envio usa `node:http`/`https` e não `fetch`: o `fetch` do Node segue a lista de "portas ruins" da especificação Fetch e recusa, por exemplo, a porta 6000, e o receptor de um cliente pode estar em qualquer porta.
 
 **Consequência.** Resposta fora de 2xx ou falha de rede vira nova tentativa com backoff; o teste de ponta a ponta sobe um servidor local, devolve 500 na primeira vez e confere a assinatura na segunda.
 

@@ -54,7 +54,7 @@ WORKER_DB_PASSWORD=<outra senha forte>
 JWT_SECRET=<openssl rand -base64 48>
 
 # A API escuta só na interface local; o Caddy faz a ponte.
-API_PORT=127.0.0.1:4190
+API_PORT=127.0.0.1:4280
 
 # Sem contas de demonstração nem receptor de webhook de teste.
 DEMO_MODE=false
@@ -71,7 +71,7 @@ Suba:
 ```bash
 docker compose up -d --build
 docker compose ps                 # db healthy, migrate exited (0), api e worker healthy
-curl -s http://127.0.0.1:4190/ready
+curl -s http://127.0.0.1:4280/ready
 ```
 
 O serviço `migrate` roda uma vez a cada `up`: aplica migrações pendentes e define as senhas dos papéis `balcao_app` e `balcao_worker` a partir do `.env`. A API e o worker só sobem depois dele terminar com sucesso.
@@ -108,7 +108,7 @@ api.seudominio.com.br {
 	@metrics path /metrics
 	respond @metrics 404
 
-	reverse_proxy 127.0.0.1:4190 {
+	reverse_proxy 127.0.0.1:4280 {
 		health_uri /ready
 		health_interval 10s
 	}
@@ -184,7 +184,7 @@ O `migrate` aplica as migrações novas antes de a API nova subir. Migrações s
 ```bash
 docker compose logs -f api worker    # logs JSON, um por linha
 docker compose ps
-curl -s http://127.0.0.1:4190/metrics | grep balcao_fila
+curl -s http://127.0.0.1:4280/metrics | grep balcao_fila
 curl -s http://127.0.0.1:4191/metrics  # métricas do worker (de dentro do contêiner ou da rede do compose)
 ```
 

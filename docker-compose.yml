@@ -1,6 +1,6 @@
 # Balcão local ou em qualquer VM com Docker:
 #   docker compose up
-# Console em http://localhost:4190, documentação em http://localhost:4190/docs.
+# Console em http://localhost:4280, documentação em http://localhost:4280/docs.
 # Valores padrão servem para demonstração; em produção, defina tudo no .env
 # (veja .env.example e docs/DEPLOY.md).
 
@@ -17,7 +17,7 @@ x-app: &app
     ADMIN_DATABASE_URL: postgres://${POSTGRES_USER:-balcao}:${POSTGRES_PASSWORD:-balcao_dev}@db:5432/${POSTGRES_DB:-balcao}
     JWT_SECRET: ${JWT_SECRET:-somente-para-demo-local-troque-em-producao-0123456789}
     DEMO_MODE: ${DEMO_MODE:-true}
-    DEMO_WEBHOOK_URL: http://api:4190/demo/webhooks
+    DEMO_WEBHOOK_URL: http://api:4280/demo/webhooks
     WHATSAPP_SIMULATED_LATENCY_MS: ${WHATSAPP_SIMULATED_LATENCY_MS:-1500}
   restart: unless-stopped
 
@@ -54,12 +54,12 @@ services:
     <<: *app
     command: ["node", "dist/server.js"]
     ports:
-      - "${API_PORT:-4190}:4190"
+      - "${API_PORT:-4280}:4280"
     depends_on:
       migrate:
         condition: service_completed_successfully
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:4190/ready || exit 1"]
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:4280/ready || exit 1"]
       interval: 10s
       timeout: 3s
       retries: 5

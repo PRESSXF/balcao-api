@@ -147,7 +147,7 @@ export function hojeNoRecife(agora = new Date()): string {
 
 export async function semear(admin: pg.ClientBase, opcoes: OpcoesSeed = {}): Promise<{ empresas: number }> {
   const hoje = opcoes.hoje ?? hojeNoRecife()
-  const urlDemo = opcoes.urlWebhookDemo ?? 'http://localhost:4190/demo/webhooks'
+  const urlDemo = opcoes.urlWebhookDemo ?? 'http://localhost:4280/demo/webhooks'
   const hash = await gerarHash(SENHA_DEMO)
 
   await admin.query('begin')

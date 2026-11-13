@@ -139,10 +139,10 @@ Na primeira vez o Compose constrói a imagem, sobe o PostgreSQL, aplica as migra
 
 | Endereço | O que é |
 |---|---|
-| http://localhost:4190 | Console: escolha uma das contas (senha `balcao123`) |
-| http://localhost:4190/docs | Documentação OpenAPI com "Try it out" |
-| http://localhost:4190/metrics | Métricas no formato do Prometheus |
-| http://localhost:4190/ready | Prontidão: banco acessível e migração esperada |
+| http://localhost:4280 | Console: escolha uma das contas (senha `balcao123`) |
+| http://localhost:4280/docs | Documentação OpenAPI com "Try it out" |
+| http://localhost:4280/metrics | Métricas no formato do Prometheus |
+| http://localhost:4280/ready | Prontidão: banco acessível e migração esperada |
 | `localhost:55432` | PostgreSQL (usuário `balcao`, senha `balcao_dev`), só na interface local |
 
 Para ver a recusa do banco, crie um agendamento e clique em **Agendar** de novo num horário que cruze o primeiro. Para ver a fila de mortos, entre no Sabor do Capibaribe: o webhook do restaurante aponta para um endereço que não existe.
@@ -154,7 +154,7 @@ cp .env.example .env            # ajuste as URLs e o JWT_SECRET
 npm install
 npm run db:preparar             # migrações, papéis e dados de demonstração
 npm run build
-npm start                       # API e console na porta 4190
+npm start                       # API e console na porta 4280
 npm run start:worker            # em outro terminal
 ```
 

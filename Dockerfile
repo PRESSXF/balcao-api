@@ -17,6 +17,6 @@ RUN npm ci --omit=dev && npm cache clean --force
 COPY --from=build /app/dist dist
 COPY db db
 USER node
-EXPOSE 4190
-HEALTHCHECK --interval=10s --timeout=3s --start-period=10s CMD wget -qO- http://127.0.0.1:4190/health || exit 1
+EXPOSE 4280
+HEALTHCHECK --interval=10s --timeout=3s --start-period=10s CMD wget -qO- http://127.0.0.1:4280/health || exit 1
 CMD ["node", "dist/server.js"]

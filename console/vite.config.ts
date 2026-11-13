@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 
 // O console é servido pela própria API em "/". Em desenvolvimento, o Vite
-// repassa as chamadas para a API local na porta 4190.
+// repassa as chamadas para a API local na porta 4280.
 export default defineConfig({
   root: 'console',
   base: '/',
@@ -10,9 +10,9 @@ export default defineConfig({
   server: {
     port: 5190,
     proxy: {
-      '/v1': 'http://localhost:4190',
-      '/demo': 'http://localhost:4190',
-      '/docs': 'http://localhost:4190',
+      '/v1': 'http://localhost:4280',
+      '/demo': 'http://localhost:4280',
+      '/docs': 'http://localhost:4280',
     },
   },
 })

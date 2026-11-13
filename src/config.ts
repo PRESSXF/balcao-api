@@ -70,7 +70,7 @@ export function carregarConfig(): Config {
   return {
     ambiente,
     host: texto('HOST', '0.0.0.0'),
-    porta: inteiro('PORT', 4190),
+    porta: inteiro('PORT', 4280),
     databaseUrl: texto('DATABASE_URL', 'postgres://balcao_app:balcao_app_dev@localhost:55432/balcao'),
     workerDatabaseUrl: texto('WORKER_DATABASE_URL', 'postgres://balcao_worker:balcao_worker_dev@localhost:55432/balcao'),
     adminDatabaseUrl: texto('ADMIN_DATABASE_URL', 'postgres://balcao:balcao_dev@localhost:55432/balcao'),
@@ -81,7 +81,7 @@ export function carregarConfig(): Config {
     loginLimitePorMinuto: inteiro('LOGIN_RATE_LIMIT', 5),
     logNivel: texto('LOG_LEVEL', 'info'),
     modoDemo: booleano('DEMO_MODE', ambiente !== 'production'),
-    urlWebhookDemo: texto('DEMO_WEBHOOK_URL', 'http://localhost:4190/demo/webhooks'),
+    urlWebhookDemo: texto('DEMO_WEBHOOK_URL', 'http://localhost:4280/demo/webhooks'),
     pastaMigracoes: path.resolve(texto('MIGRATIONS_DIR', 'db/migrations')),
     pastaConsole: path.resolve(texto('CONSOLE_DIR', 'dist/console')),
     worker: {
