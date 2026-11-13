@@ -85,8 +85,8 @@ export const auth = (token: string) => ({ authorization: `Bearer ${token}` })
 export async function idsDe(admin: pg.Pool, tenantId: string) {
   const q = async (sql: string) => (await admin.query<{ id: string }>(sql, [tenantId])).rows.map((r) => r.id)
   return {
-    profissionais: await q('select id from profissionais where tenant_id = $1 order by nome'),
-    clientes: await q('select id from clientes where tenant_id = $1 order by nome'),
-    servicos: await q('select id from servicos where tenant_id = $1 order by nome'),
+    profissionais: await q('select id from profissionais where tenant_id = $1 order by nome collate "C"'),
+    clientes: await q('select id from clientes where tenant_id = $1 order by nome collate "C"'),
+    servicos: await q('select id from servicos where tenant_id = $1 order by nome collate "C"'),
   }
 }
