@@ -4,6 +4,7 @@ import pg from 'pg'
 import type { Logger } from 'pino'
 import { calcularEspera, concluirJob, falharJob, pegarJobs, proximoAgendado, recuperarTravados, type Job, type TipoJob } from './fila.js'
 import type { ContextoJob, Handler } from './handlers.js'
+import { enviarHttp, type EnviarHttp } from './http.js'
 
 export interface OpcoesWorker {
   pool: pg.Pool
@@ -16,7 +17,7 @@ export interface OpcoesWorker {
   travaTimeoutSeg?: number
   backoff?: { baseMs: number; maxMs: number }
   latenciaWhatsappMs?: number
-  fetch?: typeof fetch
+  enviarHttp?: EnviarHttp
   id?: string
   aoTerminar?: (job: Job, resultado: 'concluido' | 'pendente' | 'morto', duracaoMs: number) => void
 }
@@ -48,7 +49,7 @@ export class Worker {
       travaTimeoutSeg: 300,
       backoff: { baseMs: 2000, maxMs: 600_000 },
       latenciaWhatsappMs: 0,
-      fetch: globalThis.fetch,
+      enviarHttp,
       ...opcoes,
     }
   }
@@ -144,7 +145,7 @@ export class Worker {
   private async executar(job: Job): Promise<void> {
     const inicio = performance.now()
     const log = this.o.log.child({ job: job.id, tipo: job.tipo, tenant: job.tenant_id, tentativa: job.tentativas })
-    const ctx: ContextoJob = { pool: this.o.pool, latenciaWhatsappMs: this.o.latenciaWhatsappMs, fetch: this.o.fetch }
+    const ctx: ContextoJob = { pool: this.o.pool, latenciaWhatsappMs: this.o.latenciaWhatsappMs, enviarHttp: this.o.enviarHttp }
     try {
       const handler = this.o.handlers[job.tipo]
       if (!handler) throw new Error(`tipo de job sem handler: ${job.tipo}`)

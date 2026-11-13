@@ -3,11 +3,12 @@ import { withTenant } from '../db/pool.js'
 import { formatarDataHora, primeiroNome, sleep } from '../lib/formato.js'
 import { assinarWebhook } from './assinatura.js'
 import type { Job, TipoJob } from './fila.js'
+import type { EnviarHttp } from './http.js'
 
 export interface ContextoJob {
   pool: pg.Pool
   latenciaWhatsappMs: number
-  fetch: typeof fetch
+  enviarHttp: EnviarHttp
 }
 
 /** Devolve um texto curto com o resultado (fica em jobs.resultado). Lança para pedir nova tentativa. */
@@ -90,8 +91,7 @@ export const entregaWebhook: Handler = async (job, ctx) => {
     empresa_id: job.tenant_id,
     dados: job.payload.dados ?? {},
   })
-  const resposta = await ctx.fetch(empresa.webhook_url, {
-    method: 'POST',
+  const resposta = await ctx.enviarHttp(empresa.webhook_url, {
     headers: {
       'content-type': 'application/json',
       'user-agent': 'balcao-webhooks/1.0',
@@ -100,10 +100,10 @@ export const entregaWebhook: Handler = async (job, ctx) => {
       'x-balcao-tentativa': String(job.tentativas),
       'x-balcao-assinatura': assinarWebhook(corpo, empresa.webhook_segredo),
     },
-    body: corpo,
-    signal: AbortSignal.timeout(5000),
+    corpo,
+    timeoutMs: 5000,
   })
-  if (!resposta.ok) throw new Error(`HTTP ${resposta.status} de ${new URL(empresa.webhook_url).host}`)
+  if (resposta.status < 200 || resposta.status >= 300) throw new Error(`HTTP ${resposta.status} de ${new URL(empresa.webhook_url).host}`)
 
   await withTenant(ctx.pool, { tenantId: job.tenant_id }, (db) =>
     db.execute(

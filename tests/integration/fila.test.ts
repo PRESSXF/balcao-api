@@ -281,7 +281,7 @@ describe('handlers', () => {
         await new Promise((r) => setTimeout(r, 60))
       }
       expect(await estado(id!)).toMatchObject({ status: 'morto', tentativas: 3 })
-      expect((await estado(id!)).ultimo_erro).toMatch(/fetch failed/)
+      expect((await estado(id!)).ultimo_erro).toMatch(/ECONNREFUSED/)
     })
 
     it('empresa sem webhook: job concluído como ignorado', async () => {

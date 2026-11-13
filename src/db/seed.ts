@@ -267,7 +267,7 @@ export async function semear(admin: pg.ClientBase, opcoes: OpcoesSeed = {}): Pro
        values ($1, 'entrega_webhook',
                jsonb_build_object('evento', 'pedido.criado', 'dados', jsonb_build_object('pedido_id', (select id from pedidos where tenant_id = $1 order by criado_em limit 1))),
                'morto', 5, 5, now() - interval '20 minutes', now() - interval '52 minutes',
-               'fetch failed: getaddrinfo ENOTFOUND webhook.sabor-do-capibaribe.invalid', 'seed:webhook-morto')`,
+               'getaddrinfo ENOTFOUND webhook.sabor-do-capibaribe.invalid', 'seed:webhook-morto')`,
       [EMPRESAS_DEMO.restaurante],
     )
     await admin.query('commit')
